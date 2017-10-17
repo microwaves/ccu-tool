@@ -1,0 +1,38 @@
+#!/usr/bin/env ruby
+
+require 'ccu_tool'
+require 'optparse'
+
+options = {}
+
+OptionParser.new do |opts|
+  opts.banner = "Usage: ccu-tool [option] [argument]"
+
+  opts.on('-a', '--arl-purge x,y,z', Array, 'Send purge request for the desired objects based on ARL') do |p|
+    options[:arl_purge] = p
+  end
+
+  opts.on('-c', '--cp-purge x,y,z', Array, 'Send purge request for the desired objects based on CP codes') do |p|
+    options[:cp_purge] = p
+  end
+
+  opts.on('-l', '--get-queue-length', 'Get the length of the queue for purge requests') do |l|
+    options[:get_queue_length] = l
+  end
+
+  opts.on('-s', '--get-purge-status id', String, 'Get the status of a previous purge request') do |s|
+    options[:get_purge_status] = s
+  end
+end.parse!
+
+if options[:arl_purge]
+  res = CCUTool.purge('arl', options[:arl_purge])
+elsif options[:cp_purge]
+  res = CCUTool.purge('cp', options[:cp_purge])
+elsif options[:get_queue_length]
+  res = CCUTool.get_queue_length
+elsif options[:get_purge_status]
+  res = CCUTool.get_purge_status(options[:get_purge_status])
+end
+
+puts JSON.pretty_generate(JSON.parse(res))
